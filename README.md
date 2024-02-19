@@ -83,7 +83,7 @@ An example usage might look like:
 ```js
 function meta(key, value) {
   return (_, context) => {
-    Object.assign(context.metadata, { [key]: value });
+    context.metadata[key] = value;
   };
 }
 
@@ -135,8 +135,8 @@ be modified or extended by children rather than overriding it.
 ```ts
 function appendMeta(key, value) {
   return (_, context) => {
-    // NOTE: be sure to copy, not mutate
     const existing = context.metadata[key] ?? [];
+    // NOTE: be sure to copy, not mutate
     context.metadata[key] = [...existing, value];
   };
 }
