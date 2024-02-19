@@ -43,18 +43,30 @@ provided via the decorator's context argument, and is then accessible via the
 The overall decorator signature will be updated to the following:
 
 ```ts
-type Decorator = (value: Input, context: {
-  kind: string;
-  name: string | symbol;
-  access: {
-    get?(): unknown;
-    set?(value: unknown): void;
-  };
-  isPrivate?: boolean;
-  isStatic?: boolean;
-  addInitializer?(initializer: () => void): void;
-+ metadata?: Record<string | number | symbol, unknown>;
-}) => Output | void;
+interface ClassDecorator<Class extends abstract new (...args: any[]) => any> {
+  (value: Input, context: {
+    kind: "class";
+    name: string | undefined;
+    addInitializer(initializer: (this: This) => void): void;
++   metadata?: Record<string | number | symbol, unknown>;
+  }): Output | void;
+}
+
+interface ClassMemberDecorator<This, Value> {
+  (value: Input, context: {
+    kind: "method" | "getter" | "setter" | "accessor" | "field";
+    name: string | symbol;
+    private: boolean;
+    static: boolean;
+    access: {
+      has(object: This): boolean;
+      get?(object: This): Value;
+      set?(object: This, value: Value): void;
+    };
+    addInitializer(initializer: (this: This) => void): void;
++   metadata?: Record<string | number | symbol, unknown>;
+  }): Output | void;
+}
 ```
 
 The new `metadata` property is a plain JavaScript object. The same object is
