@@ -40,20 +40,24 @@ provided via the decorator's context argument, and is then accessible via the
 
 ## Detailed Design
 
-The overall decorator signature will be updated to the following:
+The class decorator signature will be updated to the following:
 
 ```ts
 interface ClassDecorator<Class extends abstract new (...args: any[]) => any> {
-  (value: Input, context: {
+  (target: Class, context: {
     kind: "class";
     name: string | undefined;
-    addInitializer(initializer: (this: This) => void): void;
+    addInitializer(initializer: (this: Class) => void): void;
 +   metadata?: Record<string | number | symbol, unknown>;
-  }): Output | void;
+  }): Class | void;
 }
+```
 
+And the class member decorator signature will be updated to the following:
+
+```ts
 interface ClassMemberDecorator<This, Value> {
-  (value: Input, context: {
+  (target: Input, context: {
     kind: "method" | "getter" | "setter" | "accessor" | "field";
     name: string | symbol;
     private: boolean;
@@ -79,7 +83,7 @@ An example usage might look like:
 ```js
 function meta(key, value) {
   return (_, context) => {
-    context.metadata[key] = value;
+    Object.assign(context.metadata, { [key]: value });
   };
 }
 
